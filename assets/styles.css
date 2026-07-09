@@ -1,0 +1,440 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded');
+
+/* Global Dashboard Background */
+html,
+body,
+.stApp,
+.main,
+[data-testid="stApp"],
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+[data-testid="stMainBlockContainer"] {
+    background-color: #F8F3EA !important;
+}
+
+/* Main content container */
+.block-container {
+    background-color: #F8F3EA !important;
+    padding-top: 1.4rem;
+    padding-left: 2.2rem;
+    padding-right: 2.2rem;
+    max-width: 1500px;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #F1E7D8 0%, #E9DCC8 100%) !important;
+    border-right: 1px solid #D8CBB8;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+    padding-top: 2rem;
+}
+
+section[data-testid="stSidebar"] a {
+    font-size: 15px;
+    font-weight: 650;
+    color: #5E554C;
+    border-radius: 14px;
+    padding: 10px 14px;
+    margin: 5px 10px;
+    transition: all 0.2s ease;
+}
+
+section[data-testid="stSidebar"] a:hover {
+    background: #FFFDF8;
+    color: #2F2A24;
+    box-shadow: 0 6px 16px rgba(88, 67, 43, 0.10);
+    transform: translateX(3px);
+}
+
+section[data-testid="stSidebar"] a[aria-current="page"] {
+    background: #D8C29D;
+    color: #2F2A24;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(88, 67, 43, 0.14);
+}
+
+/* Typography */
+h1, h2, h3 {
+    color: #2F2A24;
+    font-weight: 800;
+}
+
+hr {
+    border-color: #D8CBB8;
+}
+
+/* Metric Cards */
+.metric-card {
+    background: #FFFDF8;
+    border: 1px solid #E2D3BC;
+    border-radius: 18px;
+    padding: 20px 18px;
+    box-shadow: 0px 10px 24px rgba(88, 67, 43, 0.08);
+    min-height: 135px;
+    overflow: hidden;
+}
+
+.metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #E8C15D;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    box-shadow: 0 6px 18px rgba(201,165,92,0.18);
+    transition: 0.25s;
+}
+
+.metric-icon img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.material-symbols-rounded {
+    font-size: 24px;
+    color: #5E4525;
+}
+
+.metric-title {
+    font-size: 13px;
+    color: #62564B;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.metric-value {
+    font-size: 27px;
+    font-weight: 850;
+    color: #1F1A17;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.metric-change {
+    font-size: 12px;
+    color: #2E7D32;
+    margin-top: 8px;
+}
+
+/* Select Inputs */
+div[data-baseweb="select"] > div {
+    background-color: #FFFDF8;
+    border-radius: 14px;
+    border: 1px solid #E2D3BC;
+}
+
+/* Plotly Charts */
+[data-testid="stPlotlyChart"] {
+    background: #FFFDF8;
+    border: 1px solid #E2D3BC;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0px 10px 24px rgba(88, 67, 43, 0.07);
+    overflow: hidden;
+}
+
+[data-testid="stPlotlyChart"] > div {
+    width: 100% !important;
+}
+
+div[data-testid="stVerticalBlock"] {
+    gap: 0.8rem;
+}
+
+/* Insight Cards */
+.insight-main {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1F1A17;
+    line-height: 1.2;
+    margin-top: 6px;
+}
+
+.insight-sub {
+    font-size: 14px;
+    font-weight: 700;
+    color: #5E6B4E;
+    margin-top: 10px;
+}
+
+.insight-card {
+    min-height: 165px;
+}
+
+/* Executive Summary */
+.summary-card {
+    background: #FFFFFF;
+    border: 1.5px solid #E1C89B;
+    border-radius: 18px;
+    padding: 22px 28px;
+    color: #2F3E2E;
+    font-size: 19px;
+    line-height: 1.7;
+    font-weight: 500;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    margin-top: 12px;
+    margin-bottom: 20px;
+}
+
+/* Store Leaderboard */
+.leaderboard-card {
+    background: #FFFDF8;
+    border: 1px solid #E2D3BC;
+    border-radius: 18px;
+    padding: 22px 26px;
+    margin-bottom: 18px;
+    box-shadow: 0px 10px 24px rgba(88, 67, 43, 0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.leaderboard-rank {
+    font-size: 34px;
+    width: 60px;
+    text-align: center;
+}
+
+.leaderboard-content {
+    flex: 1;
+}
+
+.leaderboard-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1F1A17;
+}
+
+.leaderboard-subtitle {
+    font-size: 13px;
+    color: #6F655B;
+    margin-top: 4px;
+    margin-bottom: 16px;
+}
+
+.leaderboard-metrics {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+}
+
+.leaderboard-metrics span {
+    display: block;
+    font-size: 12px;
+    color: #6F655B;
+    margin-bottom: 4px;
+}
+
+.leaderboard-metrics strong {
+    font-size: 17px;
+    color: #2F2A24;
+}
+
+.leaderboard-status {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-good {
+    background: #E8F3EA;
+    color: #2E8B57;
+}
+
+.status-neutral {
+    background: #F5EEDC;
+    color: #8A6A2A;
+}
+
+.status-risk {
+    background: #FDECEC;
+    color: #D9534F;
+}
+
+/* Professional Page Header */
+.page-header {
+    background: #FFFDF8;
+    border: 1px solid #E2D3BC;
+    border-radius: 24px;
+    padding: 32px 36px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    box-shadow: 0px 12px 28px rgba(88, 67, 43, 0.08);
+}
+
+.page-header-logo img {
+    width: 190px;
+    height: auto;
+    object-fit: contain;
+}
+
+.page-header-title {
+    font-size: 44px;
+    font-weight: 850;
+    color: #2F2A24;
+    line-height: 1.1;
+}
+
+.page-header-subtitle {
+    font-size: 18px;
+    color: #6F655B;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+/* Persona Center Header */
+.persona-header {
+    text-align: center;
+    padding: 18px 0 34px 0;
+}
+
+.persona-logo {
+    width: 260px;
+    height: auto;
+    margin-bottom: 18px;
+}
+
+.persona-title {
+    font-size: 42px;
+    font-weight: 800;
+    color: #2F2A24;
+    line-height: 1.15;
+}
+
+.persona-subtitle {
+    margin-top: 10px;
+    font-size: 20px;
+    color: #6F655B;
+    font-weight: 500;
+}
+
+/* Home Hero Page */
+.hero-section {
+    height: 620px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 28px;
+    overflow: hidden;
+    margin-top: 10px;
+    margin-bottom: 36px;
+    box-shadow: 0px 18px 40px rgba(88, 67, 43, 0.12);
+}
+
+.hero-overlay {
+    width: 100%;
+    height: 100%;
+    background: rgba(47, 42, 36, 0.12);
+}
+
+.home-intro {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 50px;
+}
+
+.home-intro h2 {
+    font-size: 42px;
+    margin-bottom: 10px;
+}
+
+.home-intro p {
+    font-size: 19px;
+    color: #6F655B;
+}
+
+/* Home Feature Cards */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 35px;
+}
+
+.feature-card {
+    background: #FFFDF8;
+    border: 1px solid #E2D3BC;
+    border-radius: 22px;
+    padding: 44px 32px;
+    text-align: center;
+    box-shadow: 0px 12px 28px rgba(88, 67, 43, 0.08);
+    min-height: 280px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: #D8C29D;
+}
+
+.feature-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0px 20px 45px rgba(88, 67, 43, 0.16);
+}
+
+.feature-img {
+    width: 76px;
+    height: 76px;
+    object-fit: contain;
+    margin-bottom: 22px;
+    transition: 0.25s ease;
+}
+
+.feature-card:hover .feature-img {
+    transform: scale(1.08);
+}
+
+.feature-card h3 {
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: #2F2A24;
+}
+
+.feature-card p {
+    color: #6F655B;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    color: #777;
+    margin-top: 70px;
+    margin-bottom: 30px;
+}
+
+.footer h4 {
+    color: #2F2A24;
+}
+/* Hover animation for KPI / Insight cards */
+.metric-card,
+.summary-card,
+div[data-testid="stMetric"],
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    transition: all 0.25s ease;
+}
+
+.metric-card:hover,
+.summary-card:hover,
+div[data-testid="stMetric"]:hover,
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    transform: translateY(-6px);
+    box-shadow: 0px 18px 42px rgba(88, 67, 43, 0.16);
+}
