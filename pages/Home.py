@@ -14,7 +14,7 @@ def image_to_base64(path):
 
 load_css("assets/styles.css")
 
-hero_image = image_to_base64("assets/images/persona_hero.png")
+hero_image = image_to_base64("assets/images/Persona_hero.png")
 
 executive_icon = image_to_base64("assets/icons/executive_analysis.png")
 diamond_icon = image_to_base64("assets/icons/diamond.png")
