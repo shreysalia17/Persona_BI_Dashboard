@@ -36,7 +36,7 @@ def hide_sidebar():
 def show_login_page():
     hide_sidebar()
 
-    hero_image = image_to_base64("assets/images/persona_hero.png")
+    hero_image = image_to_base64("assets/images/Persona_hero.png")
 
     st.markdown(
         f"""
