@@ -1,4 +1,5 @@
 import hashlib
+import os
 from datetime import datetime
 
 import gspread
@@ -13,6 +14,8 @@ SCOPES = [
 ]
 
 SPREADSHEET_ID = "1EHMbBlDCXeUPjWA1CW9-rMunxyDTxvpWtOamitdL00c"
+
+LOCAL_CREDENTIALS_PATH = "config/credentials.json"
 
 ACCOUNT_SHEET_NAME = "Account Created"
 
@@ -29,20 +32,42 @@ ACCOUNT_HEADERS = [
 ]
 
 
+# -------------------------------------------------
+# GOOGLE SHEETS CONNECTION
+# -------------------------------------------------
+
 @st.cache_resource
 def get_client():
     """
-    Use Streamlit Secrets when deployed and the local credentials file
-    when running on the developer's computer.
+    Local environment:
+        Uses config/credentials.json
+
+    Streamlit Cloud:
+        Uses st.secrets["gcp_service_account"]
     """
-    if "gcp_service_account" in st.secrets:
-        credentials = Credentials.from_service_account_info(
-            dict(st.secrets["gcp_service_account"]),
+
+    if os.path.exists(LOCAL_CREDENTIALS_PATH):
+        credentials = Credentials.from_service_account_file(
+            LOCAL_CREDENTIALS_PATH,
             scopes=SCOPES,
         )
+
     else:
-        credentials = Credentials.from_service_account_file(
-            "config/credentials.json",
+        try:
+            service_account_info = dict(
+                st.secrets["gcp_service_account"]
+            )
+
+        except Exception as error:
+            raise RuntimeError(
+                "Google service-account credentials were not found. "
+                "For local development, add config/credentials.json. "
+                "For Streamlit Cloud, add a [gcp_service_account] "
+                "section in the app's Secrets settings."
+            ) from error
+
+        credentials = Credentials.from_service_account_info(
+            service_account_info,
             scopes=SCOPES,
         )
 
@@ -54,6 +79,10 @@ def get_spreadsheet():
     client = get_client()
     return client.open_by_key(SPREADSHEET_ID)
 
+
+# -------------------------------------------------
+# DATA LOADING
+# -------------------------------------------------
 
 @st.cache_data(ttl=300)
 def load_sheet(sheet_name):
@@ -78,28 +107,36 @@ def load_all_tables():
     }
 
 
+# -------------------------------------------------
+# PASSWORD HELPERS
+# -------------------------------------------------
+
 def hash_password(password):
     """
-    Hash the password before writing it to Google Sheets.
-
-    This preserves compatibility with accounts already created using
-    the previous version of the application.
+    Preserves compatibility with accounts created by the previous
+    SHA-256 implementation.
     """
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+    return hashlib.sha256(
+        password.encode("utf-8")
+    ).hexdigest()
 
 
 def parse_boolean(value, default=False):
     """
-    Convert Google Sheets values such as TRUE, FALSE, Yes, No, 1 and 0
-    into Python boolean values.
+    Converts Google Sheets values such as TRUE, FALSE, YES, NO,
+    1 and 0 into Python boolean values.
     """
+
     if isinstance(value, bool):
         return value
 
-    if value is None or str(value).strip() == "":
+    if value is None:
         return default
 
     normalized_value = str(value).strip().lower()
+
+    if normalized_value == "":
+        return default
 
     return normalized_value in {
         "true",
@@ -111,30 +148,42 @@ def parse_boolean(value, default=False):
     }
 
 
+# -------------------------------------------------
+# ACCOUNT WORKSHEET SETUP
+# -------------------------------------------------
+
 def get_or_create_worksheet(sheet_name, headers):
     spreadsheet = get_spreadsheet()
 
     try:
         worksheet = spreadsheet.worksheet(sheet_name)
+
     except gspread.WorksheetNotFound:
         worksheet = spreadsheet.add_worksheet(
             title=sheet_name,
             rows=1000,
             cols=max(len(headers), 10),
         )
-        worksheet.append_row(headers)
+
+        worksheet.append_row(
+            headers,
+            value_input_option="USER_ENTERED",
+        )
 
     return worksheet
 
 
 def prepare_account_worksheet():
     """
-    Create the account worksheet if needed and ensure all required
-    authorization columns exist.
+    Ensures the Account Created sheet contains every required column.
 
-    Existing accounts are automatically marked Approved and Active
-    when the new columns are introduced so current users are not locked out.
+    Existing accounts are automatically assigned:
+        Approved = TRUE
+        Active = TRUE
+
+    This prevents previously created users from being locked out.
     """
+
     worksheet = get_or_create_worksheet(
         ACCOUNT_SHEET_NAME,
         ACCOUNT_HEADERS,
@@ -142,8 +191,16 @@ def prepare_account_worksheet():
 
     existing_headers = worksheet.row_values(1)
 
-    approved_column_was_missing = "Approved" not in existing_headers
-    active_column_was_missing = "Active" not in existing_headers
+    if not existing_headers:
+        worksheet.append_row(
+            ACCOUNT_HEADERS,
+            value_input_option="USER_ENTERED",
+        )
+
+        return worksheet, ACCOUNT_HEADERS
+
+    approved_column_missing = "Approved" not in existing_headers
+    active_column_missing = "Active" not in existing_headers
 
     missing_headers = [
         header
@@ -154,8 +211,13 @@ def prepare_account_worksheet():
     if missing_headers:
         updated_headers = existing_headers + missing_headers
 
+        end_cell = gspread.utils.rowcol_to_a1(
+            1,
+            len(updated_headers),
+        )
+
         worksheet.update(
-            range_name=f"A1:{gspread.utils.rowcol_to_a1(1, len(updated_headers))}",
+            range_name=f"A1:{end_cell}",
             values=[updated_headers],
         )
 
@@ -166,43 +228,54 @@ def prepare_account_worksheet():
         for index, header in enumerate(existing_headers)
     }
 
-    # Preserve access for accounts that existed before the approval system.
-    existing_records = worksheet.get_all_records()
+    # Only update old accounts when the columns were newly introduced.
+    if approved_column_missing or active_column_missing:
+        existing_records = worksheet.get_all_records()
 
-    for row_number, record in enumerate(existing_records, start=2):
-        email = str(record.get("Email", "")).strip()
+        for row_number, record in enumerate(
+            existing_records,
+            start=2,
+        ):
+            email = str(
+                record.get("Email", "")
+            ).strip()
 
-        if not email:
-            continue
+            if not email:
+                continue
 
-        if approved_column_was_missing:
-            worksheet.update_cell(
-                row_number,
-                header_positions["Approved"],
-                "TRUE",
-            )
+            if approved_column_missing:
+                worksheet.update_cell(
+                    row_number,
+                    header_positions["Approved"],
+                    "TRUE",
+                )
 
-        if active_column_was_missing:
-            worksheet.update_cell(
-                row_number,
-                header_positions["Active"],
-                "TRUE",
-            )
+            if active_column_missing:
+                worksheet.update_cell(
+                    row_number,
+                    header_positions["Active"],
+                    "TRUE",
+                )
 
     return worksheet, existing_headers
 
 
+# -------------------------------------------------
+# ACCESS REQUEST
+# -------------------------------------------------
+
 def create_account(name, email, password, role="User"):
     """
-    Submit a new access request.
+    Submits a new access request.
 
-    New users are saved as:
+    New requests receive:
         Approved = FALSE
         Active = TRUE
 
-    An administrator must change Approved to TRUE in Google Sheets
-    before the user can log in.
+    The administrator must change Approved to TRUE before the user
+    can access the dashboard.
     """
+
     worksheet, headers = prepare_account_worksheet()
 
     clean_name = str(name).strip()
@@ -215,29 +288,43 @@ def create_account(name, email, password, role="User"):
     existing_records = worksheet.get_all_records()
 
     for record in existing_records:
-        existing_email = str(record.get("Email", "")).strip().lower()
+        existing_email = str(
+            record.get("Email", "")
+        ).strip().lower()
 
-        if existing_email == clean_email:
-            approved = parse_boolean(
-                record.get("Approved"),
-                default=False,
+        if existing_email != clean_email:
+            continue
+
+        approved = parse_boolean(
+            record.get("Approved"),
+            default=False,
+        )
+
+        active = parse_boolean(
+            record.get("Active"),
+            default=True,
+        )
+
+        if approved and active:
+            return (
+                False,
+                "An approved account already exists for this email.",
             )
 
-            active = parse_boolean(
-                record.get("Active"),
-                default=True,
+        if not approved:
+            return (
+                False,
+                "An access request for this email is already pending.",
             )
 
-            if approved and active:
-                return False, "An approved account already exists for this email."
+        if not active:
+            return (
+                False,
+                "This account has been deactivated. "
+                "Please contact the administrator.",
+            )
 
-            if not approved:
-                return False, "An access request for this email is already pending."
-
-            if not active:
-                return False, "This account has been deactivated. Contact the administrator."
-
-            return False, "An account already exists for this email."
+        return False, "An account already exists for this email."
 
     new_record = {
         "Name": clean_name,
@@ -246,7 +333,9 @@ def create_account(name, email, password, role="User"):
         "Role": role,
         "Approved": "FALSE",
         "Active": "TRUE",
-        "Created_At": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "Created_At": datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
         "Approved_At": "",
         "Last_Login": "",
     }
@@ -270,18 +359,26 @@ def create_account(name, email, password, role="User"):
     )
 
 
+# -------------------------------------------------
+# LOGIN VALIDATION
+# -------------------------------------------------
+
 def validate_login(email, password):
     """
-    Validate the password and account authorization status.
+    Login succeeds only when:
 
-    Login is permitted only when:
+        Email matches
+        Password matches
         Approved = TRUE
         Active = TRUE
     """
+
     worksheet, headers = prepare_account_worksheet()
 
     clean_email = str(email).strip().lower()
-    password_hash = hash_password(str(password))
+    supplied_password_hash = hash_password(
+        str(password)
+    )
 
     records = worksheet.get_all_records()
 
@@ -290,52 +387,62 @@ def validate_login(email, password):
         for index, header in enumerate(headers)
     }
 
-    for row_number, record in enumerate(records, start=2):
-        record_email = str(record.get("Email", "")).strip().lower()
+    for row_number, record in enumerate(
+        records,
+        start=2,
+    ):
+        record_email = str(
+            record.get("Email", "")
+        ).strip().lower()
+
         stored_password_hash = str(
             record.get("Password_Hash", "")
         ).strip()
 
         if (
-            record_email == clean_email
-            and stored_password_hash == password_hash
+            record_email != clean_email
+            or stored_password_hash != supplied_password_hash
         ):
-            approved = parse_boolean(
-                record.get("Approved"),
-                default=False,
+            continue
+
+        approved = parse_boolean(
+            record.get("Approved"),
+            default=False,
+        )
+
+        active = parse_boolean(
+            record.get("Active"),
+            default=True,
+        )
+
+        if not approved:
+            pending_record = dict(record)
+            pending_record["Login_Status"] = "Pending Approval"
+
+            return False, pending_record
+
+        if not active:
+            inactive_record = dict(record)
+            inactive_record["Login_Status"] = "Inactive"
+
+            return False, inactive_record
+
+        login_time = datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
+        if "Last_Login" in header_positions:
+            worksheet.update_cell(
+                row_number,
+                header_positions["Last_Login"],
+                login_time,
             )
 
-            active = parse_boolean(
-                record.get("Active"),
-                default=True,
-            )
+        approved_record = dict(record)
+        approved_record["Last_Login"] = login_time
+        approved_record["Login_Status"] = "Approved"
 
-            if not approved:
-                pending_record = dict(record)
-                pending_record["Login_Status"] = "Pending Approval"
-
-                return False, pending_record
-
-            if not active:
-                inactive_record = dict(record)
-                inactive_record["Login_Status"] = "Inactive"
-
-                return False, inactive_record
-
-            login_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            if "Last_Login" in header_positions:
-                worksheet.update_cell(
-                    row_number,
-                    header_positions["Last_Login"],
-                    login_time,
-                )
-
-            approved_record = dict(record)
-            approved_record["Last_Login"] = login_time
-            approved_record["Login_Status"] = "Approved"
-
-            return True, approved_record
+        return True, approved_record
 
     return False, {
         "Login_Status": "Invalid Credentials",
