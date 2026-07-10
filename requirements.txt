@@ -1,8 +1,8 @@
-streamlit
-pandas
-gspread
-google-auth
-plotly
-reportlab
-openpyxl
-Pillow
+streamlit==1.59.0
+pandas==3.0.3
+numpy==2.5.1
+plotly==6.8.0
+gspread==6.2.1
+google-auth==2.55.1
+Pillow==12.3.0
+openpyxl==3.1.5
