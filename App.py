@@ -6,7 +6,7 @@ from src.google_sheets import create_account, validate_login
 
 from PIL import Image
 
-logo = Image.open("assets/logo/Persona_1.png")
+logo = Image.open("assets/logo/persona_1.png")
 
 st.set_page_config(
     page_title="Persona Intelligence",
