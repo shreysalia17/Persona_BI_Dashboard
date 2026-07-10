@@ -278,8 +278,7 @@ def show_login_page():
                         st.info(
                             "Your account cannot access the dashboard yet. "
                             "You will be able to log in after an "
-                            "administrator changes Approved to TRUE in "
-                            "the Account Created Google Sheet."
+                            "administrator approves your request. "
                         )
 
                     else:
