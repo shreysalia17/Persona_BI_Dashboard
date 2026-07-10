@@ -176,22 +176,22 @@ pages = {
 
     "Executive Analytics": [
         st.Page("pages/Executive_Dashboard.py", title="Executive Dashboard"),
-        st.Page("pages/Store_performance.py", title="Store Performance"),
-        st.Page("pages/Customer_performance.py", title="Customer Performance"),
-        st.Page("pages/Jewelery_analysis.py", title="Jewelry Analysis"),
-        st.Page("pages/Sales_analysis.py", title="Sales Analysis"),
+        st.Page("pages/Store_Performance.py", title="Store Performance"),
+        st.Page("pages/Customer_Performance.py", title="Customer Performance"),
+        st.Page("pages/Jewelery_Analysis.py", title="Jewelry Analysis"),
+        st.Page("pages/Sales_Analysis.py", title="Sales Analysis"),
     ],
 
     "Intelligence": [
-        st.Page("pages/Inventory_intelligence.py", title="Inventory Intelligence"),
-        st.Page("pages/Sales_forecasting.py", title="Sales Forecasting"),
-        st.Page("pages/AI_insights.py", title="AI Insights"),
-        st.Page("pages/Smart_search.py", title="Smart Search"),
+        st.Page("pages/Inventory_Intelligence.py", title="Inventory Intelligence"),
+        st.Page("pages/Sales_Forecasting.py", title="Sales Forecasting"),
+        st.Page("pages/AI_Insights.py", title="AI Insights"),
+        st.Page("pages/Smart_Search.py", title="Smart Search"),
         st.Page("pages/Executive_Briefing.py", title="Executive Briefing"),
     ],
 
     "Reports": [
-        st.Page("pages/Report_center.py", title="Report Center"),
+        st.Page("pages/Report_Center.py", title="Report Center"),
     ],
 }
 
