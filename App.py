@@ -4,12 +4,15 @@ import streamlit as st
 from src.google_sheets import create_account, validate_login
 
 
+from PIL import Image
+
+logo = Image.open("assets/logo/Persona_1.png")
+
 st.set_page_config(
     page_title="Persona Intelligence",
-    page_icon="💎",
-    layout="wide"
+    page_icon=logo,
+    layout="wide",
 )
-
 
 def image_to_base64(path):
     with open(path, "rb") as img:
